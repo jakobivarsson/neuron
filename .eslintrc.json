@@ -1,0 +1,10 @@
+{
+  "extends": [
+    "babel",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["jest"],
+  "env": {
+    "jest/globals": true
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "neuron",
+  "version": "1.0.0",
+  "description": "Real-time collaborative data store",
+  "main": "index.js",
+  "author": "Jakob Ivarsson",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add",
+      "jest --bail --findRelatedTests"
+    ]
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.2",
+    "babel-jest": "^22.4.3",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.19.1",
+    "eslint-config-babel": "^7.0.2",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-flowtype": "^2.46.1",
+    "eslint-plugin-jest": "^21.15.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "husky": "^0.14.3",
+    "jest": "^22.4.3",
+    "lint-staged": "^7.0.0",
+    "prettier": "1.11.1",
+    "pretty-quick": "^1.4.1"
+  },
+  "dependencies": {
+    "immutable": "^3.8.2"
+  }
+}
