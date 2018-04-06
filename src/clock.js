@@ -1,7 +1,8 @@
 // class Clock {
-//   constructor(id) {
-//     this.id = id;
-//     this.timestamp = () =>
+//   constructor(init = 0) {
+//     this.clock = init;
+
+//     this.update
 //   }
 // }
 

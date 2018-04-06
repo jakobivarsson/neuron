@@ -34,7 +34,5 @@
     "prettier": "1.11.1",
     "pretty-quick": "^1.4.1"
   },
-  "dependencies": {
-    "immutable": "^3.8.2"
-  }
+  "dependencies": {}
 }

@@ -9,6 +9,11 @@ describe("Map", () => {
     expect(m.get("b")).toBe("c");
   });
 
+  test("getId", () => {
+    const m = new Map().add("a", 0, "b");
+    expect(m.getId("a")).toBe("b");
+  });
+
   test("remove", () => {
     let m = new Map();
     m = m.add("a", "b", 0);
