@@ -1,6 +1,6 @@
-import * as c from "../src/clock";
+import * as c from "../src/vclock";
 
-describe("clock", () => {
+describe("vclock", () => {
   test("lt", () => {
     const a = { a: 1 };
     const b = { a: 1, b: 2 };

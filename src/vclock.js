@@ -1,11 +1,3 @@
-// class Clock {
-//   constructor(init = 0) {
-//     this.clock = init;
-
-//     this.update
-//   }
-// }
-
 export const Clock = id => ({
   [id]: 0
 });
