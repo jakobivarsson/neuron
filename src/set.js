@@ -6,8 +6,16 @@ export default class Set {
     this.entries = init;
   }
 
-  get() {
+  values() {
     return Object.values(this.entries);
+  }
+
+  get(id) {
+    return this.entries[id];
+  }
+
+  has(id) {
+    return !!this.get(id);
   }
 
   add(id, value) {

@@ -9,10 +9,6 @@ export default class Map {
     this.state = init;
   }
 
-  add(k, v, id) {
-    return new Map(add(this.state, k, Entry(k, v, id)));
-  }
-
   get(k) {
     const e = this.state[k];
     return e && e.value;
@@ -24,7 +20,12 @@ export default class Map {
   }
 
   getKey(id) {
-    return Object.values(this.state).find(entry => id === entry.id).key;
+    const e = Object.values(this.state).find(entry => id === entry.id);
+    return e && e.key;
+  }
+
+  add(k, v, id) {
+    return new Map(add(this.state, k, Entry(k, v, id)));
   }
 
   remove(id) {
