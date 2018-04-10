@@ -1,4 +1,4 @@
-import List from "../src/list";
+import List from "../list";
 
 describe("List", () => {
   test("insert", () => {

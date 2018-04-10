@@ -1,4 +1,4 @@
-import { add, remove } from "./immutable";
+import { add, remove } from "../immutable";
 
 // Id should be a globally unique id
 const Entry = (key, value, id) => ({ key, value, id });

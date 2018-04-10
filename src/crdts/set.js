@@ -1,4 +1,4 @@
-import { add, remove } from "./immutable";
+import { add, remove } from "../immutable";
 
 // OR-Set
 export default class Set {

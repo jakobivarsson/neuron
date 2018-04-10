@@ -1,4 +1,4 @@
-import Register from "../src/register";
+import Register from "../register";
 
 describe("Register", () => {
   test("get", () => {

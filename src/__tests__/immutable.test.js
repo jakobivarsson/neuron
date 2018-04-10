@@ -1,4 +1,4 @@
-import { add, remove } from "../src/immutable";
+import { add, remove } from "../immutable";
 
 describe("immutable helper functions", () => {
   test("add", () => {

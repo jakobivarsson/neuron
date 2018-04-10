@@ -1,4 +1,4 @@
-import Map from "../src/map";
+import Map from "../map";
 
 describe("Map", () => {
   test("add", () => {

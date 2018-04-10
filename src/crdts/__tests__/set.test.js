@@ -1,4 +1,4 @@
-import Set from "../src/set";
+import Set from "../set";
 
 describe("Set", () => {
   test("add", () => {

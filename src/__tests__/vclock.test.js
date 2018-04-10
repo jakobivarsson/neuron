@@ -1,4 +1,4 @@
-import * as c from "../src/vclock";
+import * as c from "../vclock";
 
 describe("vclock", () => {
   test("lt", () => {
