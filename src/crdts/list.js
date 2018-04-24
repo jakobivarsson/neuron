@@ -1,8 +1,7 @@
 import Set from "./set";
 
 // Special id for the start of the list
-// TODO static class prop? Better id?
-const startId = "START_ID";
+const startId = "__startId__";
 
 // TODO add timestamp? Sorting by id now
 const Edge = (fromId, toId) => ({
@@ -28,7 +27,8 @@ export default class List {
       .values()
       .filter(({ fromId }) => fromId === id)
       .map(({ toId }) => toId)
-      .sort((a, b) => (a < b ? -1 : 1));
+      .sort()
+      .reverse();
   }
 
   values() {
@@ -39,6 +39,15 @@ export default class List {
     return traverse()
       .map(id => this.nodes.get(id))
       .filter(ident);
+  }
+
+  startId() {
+    return startId;
+  }
+
+  get(index) {
+    // TODO improve
+    return this.values()[index];
   }
 
   // Inserts the value after the element with id=afterId.

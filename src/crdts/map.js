@@ -9,6 +9,10 @@ export default class Map {
     this.state = init;
   }
 
+  entries() {
+    return Object.entries(this.state).map(([k, v]) => [k, v.id]);
+  }
+
   get(k) {
     const e = this.state[k];
     return e && e.value;
@@ -24,6 +28,7 @@ export default class Map {
     return e && e.key;
   }
 
+  // TODO Concurrent adds should essentialy work as a LWW register
   add(k, v, id) {
     return new Map(add(this.state, k, Entry(k, v, id)));
   }
