@@ -28,9 +28,14 @@ export default class Map {
     return e && e.key;
   }
 
-  // TODO Concurrent adds should essentialy work as a LWW register
+  // Concurrent adds essentialy works as a LWW register where the add with the highest id wins.
+  // TODO Do we need the MV-register which has the same behavior or can we just use immutable values with unique id? Would this work for the list type?
   add(k, v, id) {
-    return new Map(add(this.state, k, Entry(k, v, id)));
+    const prevId = this.getId(k);
+    if (!prevId || id > prevId) {
+      return new Map(add(this.state, k, Entry(k, v, id)));
+    }
+    return this;
   }
 
   remove(id) {

@@ -18,4 +18,13 @@ describe("List", () => {
       .remove("1");
     expect(l.values()).toEqual(["a", "c"]);
   });
+
+  test("move", () => {
+    const l = new List()
+      .insert(undefined, "a", "0")
+      .insert("0", "b", "1")
+      .insert("1", "c", "2")
+      .move(undefined, "2", "3");
+    expect(l.values()).toEqual(["c", "a", "b"]);
+  });
 });

@@ -11,14 +11,24 @@ export default class Clock {
     return new Clock(this.id, this.clock++);
   }
 
-  update(clock) {
-    if (this.clock < clock) {
-      this.clock = clock;
+  update(other) {
+    if (this.clock < other.clock) {
+      this.clock = other.clock;
     }
   }
 
   // Since id is unique the timestamp is also unique
   timestamp() {
     return `${this.clock}.${this.id}`;
+  }
+
+  static parse(timestamp) {
+    const [clockStr, id] = timestamp.split(".", 1);
+    const clock = Number(clockStr);
+
+    if (!clock) {
+      throw new Error(`Cannot parse timestamp: ${timestamp}`);
+    }
+    return new Clock(id, clock);
   }
 }

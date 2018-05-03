@@ -13,6 +13,7 @@ const validateOp = (op, obj) => {
         valid = true;
       }
       break;
+    case ops.MOVE:
     case ops.INSERT:
       if (obj instanceof List) {
         valid = true;
@@ -34,17 +35,21 @@ const validateOp = (op, obj) => {
   }
 };
 
-const takesFieldParam = op => [ops.INSERT, ops.REMOVE, ops.ADD].includes(op);
+const takesFieldParam = op =>
+  [ops.MOVE, ops.INSERT, ops.REMOVE, ops.ADD].includes(op);
 
-const getParams = (op, field, obj) => {
+const getParams = (op, field, value, obj) => {
+  const getIdBeforeIndex = index => {
+    const indexBefore = Number(index) - 1;
+    if (indexBefore < 0) {
+      return obj.startId();
+    }
+    return obj.get(indexBefore);
+  };
   const params = {};
   switch (op) {
     case ops.INSERT:
-      const indexBefore = Number(field) - 1;
-      if (indexBefore < 0) {
-        params.afterId = obj.startId();
-      }
-      params.afterId = obj.get(indexBefore);
+      params.afterId = getIdBeforeIndex(field);
       break;
     case ops.REMOVE:
       params.targetId = obj.get(field);
@@ -52,6 +57,10 @@ const getParams = (op, field, obj) => {
     case ops.ADD:
       params.field = field;
       break;
+    case ops.MOVE: {
+      params.elementId = obj.get(field);
+      params.afterId = getIdBeforeIndex(value);
+    }
   }
   return params;
 };
@@ -60,6 +69,8 @@ export default class Store {
   constructor(id, init = {}) {
     this.id = id;
     this.clock = new Clock(id);
+    // A record of all applied operations
+    this.history = [];
     this.initialize(init);
   }
 
@@ -185,7 +196,7 @@ export default class Store {
     const obj = this.store.get(objId);
 
     // Operation specific params
-    const params = getParams(op, field, obj);
+    const params = getParams(op, field, value, obj);
 
     // Validate will throw if invalid
     validateOp(op, obj);
@@ -204,6 +215,8 @@ export default class Store {
 
   // Apply a generated operation
   apply(op) {
+    this.clock.update(Clock.parse(op.timestamp));
+    // TODO use callback to get obj
     let obj = this.store.get(op.objId);
     if (!obj) {
       return;
@@ -212,6 +225,7 @@ export default class Store {
       case ops.ADD:
         // Using timestamp as unique id.
         // TODO Map does not need to have value only k => id/timestamp
+        // TODO we need to garbage collect the replaced object from the store
         obj = obj.add(op.field, op.timestamp, op.timestamp);
         this.store.update(op.objId, obj);
         this.store.add(op.timestamp, op.value);
@@ -225,7 +239,12 @@ export default class Store {
         this.store.update(op.objId, obj);
         this.store.add(op.timestamp, op.value);
         return;
+      case ops.MOVE:
+        obj = obj.move(op.afterId, op.elementId, op.timestamp);
+        this.store.update(op.objId, obj);
+        return;
       case ops.REMOVE:
+        // TODO remove all descendants
         obj = obj.remove(op.targetId);
         this.store.update(op.objId, obj);
         this.store.remove(op.targetId);
@@ -233,6 +252,9 @@ export default class Store {
     }
   }
 
-  // Composes prepare and apply
-  update() {}
+  update(...args) {
+    const op = this.prepare(...args);
+    this.apply(op);
+    return op;
+  }
 }

@@ -56,6 +56,14 @@ describe("core", () => {
         type: ops.INSERT
       });
     });
+
+    test("MOVE", () => {
+      const s = new Store("a", [1, 2]);
+      const op = s.prepare([1], ops.MOVE, 0);
+      expect(op).toMatchObject({
+        type: ops.MOVE
+      });
+    });
   });
 
   describe("apply", () => {
@@ -88,6 +96,13 @@ describe("core", () => {
       const op = s.prepare(["a"], ops.SET, 2);
       s.apply(op);
       expect(s.serialize()).toEqual({ a: 2 });
+    });
+    test("MOVE", () => {
+      const s = new Store("a", [1, 2]);
+      s.apply(s.prepare([1], ops.MOVE, 0));
+      expect(s.serialize()).toEqual([2, 1]);
+      s.apply(s.prepare([1], ops.MOVE, 0));
+      expect(s.serialize()).toEqual([1, 2]);
     });
   });
 });
