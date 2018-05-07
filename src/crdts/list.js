@@ -35,21 +35,33 @@ export default class List {
   }
 
   // List of elements that follows id sorted by id.
-  // TODO faster lookup, should be sorted by timestamp
-  followers(id = startId) {
-    return this.edges
-      .values()
-      .filter(({ fromId }) => fromId === id)
-      .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1));
+  neighbors() {
+    const neighbors = this.edges.values().reduce((acc, edge) => {
+      if (acc[edge.fromId]) {
+        acc[edge.fromId].push(edge);
+      } else {
+        acc[edge.fromId] = [edge];
+      }
+      return acc;
+    }, {});
+    Object.values(neighbors).forEach(list => {
+      list.sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1));
+    });
+    return neighbors;
   }
 
   values() {
     const validEdges = this.getValidEdges();
-    // Recursively traverses the sequence and returns an ordered list of ids.
-    const traverse = (id = startId) =>
-      flatten(
-        this.followers(id).map(edge => [edge].concat(traverse(edge.toId)))
+    const neighbors = this.neighbors();
+    // Perform DFS on the adjacency list starting at startId
+    const traverse = (id = startId) => {
+      if (!neighbors[id]) {
+        return [];
+      }
+      return flatten(
+        neighbors[id].map(edge => [edge].concat(traverse(edge.toId)))
       );
+    };
     // Lookup value and remove undefined nodes (that have been removed)
     return traverse()
       .filter(edge => validEdges[edge.toId] === edge.timestamp)
@@ -62,7 +74,6 @@ export default class List {
   }
 
   get(index) {
-    // TODO improve
     return this.values()[index];
   }
 
