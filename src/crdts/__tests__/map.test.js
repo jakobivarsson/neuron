@@ -25,7 +25,7 @@ describe("Map", () => {
     let m = new Map();
     m = m.add("a", "b", 0);
     m = m.add("b", "c", 1);
-    m = m.remove(0);
+    m = m.remove(0, "a");
     expect(m.get("a")).toBeUndefined();
     expect(m.get("b")).toBe("c");
   });

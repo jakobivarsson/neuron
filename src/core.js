@@ -53,6 +53,7 @@ const getParams = (op, field, value, obj) => {
       break;
     case ops.REMOVE:
       params.targetId = obj.get(field);
+      params.field = field;
       break;
     case ops.ADD:
       params.field = field;
@@ -245,7 +246,7 @@ export default class Store {
         return;
       case ops.REMOVE:
         // TODO remove all descendants
-        obj = obj.remove(op.targetId);
+        obj = obj.remove(op.targetId, op.field);
         this.store.update(op.objId, obj);
         this.store.remove(op.targetId);
         return;

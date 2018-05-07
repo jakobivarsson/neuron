@@ -38,8 +38,10 @@ export default class Map {
     return this;
   }
 
-  remove(id) {
-    const k = this.getKey(id);
-    return new Map(remove(this.state, k));
+  remove(id, k) {
+    if (id === this.getId(k)) {
+      return new Map(remove(this.state, k));
+    }
+    return this;
   }
 }
