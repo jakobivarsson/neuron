@@ -10,7 +10,6 @@ const Edge = (fromId, toId, timestamp) => ({
 });
 
 const flatten = list => list.reduce((acc, elem) => acc.concat(elem), []);
-const ident = e => e;
 
 // Ordered list based on the RGA CRDT.
 // Consists of two CRDT Sets
@@ -50,8 +49,10 @@ export default class List {
     return neighbors;
   }
 
-  values() {
+  getEdges() {
     const validEdges = this.getValidEdges();
+    const isValid = edge =>
+      validEdges[edge.toId] === edge.timestamp && this.nodes.get(edge.toId);
     const neighbors = this.neighbors();
     // Perform DFS on the adjacency list starting at startId
     const traverse = (id = startId) => {
@@ -59,14 +60,15 @@ export default class List {
         return [];
       }
       return flatten(
-        neighbors[id].map(edge => [edge].concat(traverse(edge.toId)))
+        neighbors[id].map(edge => [edge].concat(traverse(edge.timestamp)))
       );
     };
     // Lookup value and remove undefined nodes (that have been removed)
-    return traverse()
-      .filter(edge => validEdges[edge.toId] === edge.timestamp)
-      .map(edge => this.nodes.get(edge.toId))
-      .filter(ident);
+    return traverse().filter(isValid);
+  }
+
+  values() {
+    return this.getEdges().map(edge => this.nodes.get(edge.toId));
   }
 
   startId() {
@@ -75,6 +77,12 @@ export default class List {
 
   get(index) {
     return this.values()[index];
+  }
+
+  getEdgeId(index) {
+    // Use timestamp as id as it is unique
+    // and edges are keyed by timestamp
+    return this.getEdges()[index].timestamp;
   }
 
   // Inserts the value after the element with id=afterId.

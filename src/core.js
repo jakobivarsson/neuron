@@ -44,7 +44,7 @@ const getParams = (op, field, value, obj) => {
     if (indexBefore < 0) {
       return obj.startId();
     }
-    return obj.get(indexBefore);
+    return obj.getEdgeId(indexBefore);
   };
   const params = {};
   switch (op) {
@@ -59,7 +59,7 @@ const getParams = (op, field, value, obj) => {
       params.field = field;
       break;
     case ops.MOVE: {
-      params.elementId = obj.get(field);
+      params.elementId = obj.getEdgeId(field);
       params.afterId = getIdBeforeIndex(value);
     }
   }
