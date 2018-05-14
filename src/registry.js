@@ -37,6 +37,10 @@ export default class Registry {
     return this.objects.get(id);
   }
 
+  ids() {
+    return this.objects.keys();
+  }
+
   root() {
     return this.objects.get(rootId);
   }

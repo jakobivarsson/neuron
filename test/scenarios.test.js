@@ -1,7 +1,4 @@
 import Store from "../src/core";
-import Map from "../src/crdts/map";
-import List from "../src/crdts/list";
-import Register from "../src/crdts/register";
 import * as ops from "../src/ops";
 
 // Emulates a simple publish subscribe server
@@ -73,13 +70,13 @@ describe("scenarios", () => {
     // Start state
     const c = Create([]);
     c.a
-      .update([0], ops.INSERT, new Map())
-      .update([1], ops.INSERT, new Map())
+      .update([0], ops.INSERT, {})
+      .update([1], ops.INSERT, {})
       .publish();
 
     // Concurrent operations
     c.a.update([1], ops.MOVE, 0);
-    c.b.update([1, "a"], ops.ADD, new Register("b"));
+    c.b.update([1, "a"], ops.ADD, "b");
 
     c.sync().expect([{ a: "b" }, {}]);
   });
@@ -88,13 +85,13 @@ describe("scenarios", () => {
     // Start state
     const c = Create([]);
     c.a
-      .update([0], ops.INSERT, new Register("a"))
-      .update([1], ops.INSERT, new Register("b"))
+      .update([0], ops.INSERT, "a")
+      .update([1], ops.INSERT, "b")
       .publish();
 
     // Concurrent operations
     c.a.update([1], ops.MOVE, 0);
-    c.b.update([2], ops.INSERT, new Register("c"));
+    c.b.update([2], ops.INSERT, "c");
 
     c.sync().expect(["b", "a", "c"]);
   });
@@ -103,10 +100,10 @@ describe("scenarios", () => {
     const c = Create({});
 
     // Conccurent operations
-    c.a.update(["theme"], ops.ADD, new Map());
-    c.a.update(["theme", "backgroundColor"], ops.ADD, new Register("white"));
-    c.b.update(["theme"], ops.ADD, new Map());
-    c.b.update(["theme", "textColor"], ops.ADD, new Register("black"));
+    c.a.update(["theme"], ops.ADD, {});
+    c.a.update(["theme", "backgroundColor"], ops.ADD, "white");
+    c.b.update(["theme"], ops.ADD, {});
+    c.b.update(["theme", "textColor"], ops.ADD, "black");
 
     // Updates are not merged
     c.sync().expect({ theme: { textColor: "black" } });
@@ -114,16 +111,16 @@ describe("scenarios", () => {
 
   test("concurrent insertions to same list", () => {
     const c = Create({});
-    c.a.update(["title"], ops.ADD, new List()).publish();
+    c.a.update(["title"], ops.ADD, []).publish();
 
     // Conccurent operations
     c.a
-      .update(["title", 0], ops.INSERT, new Register("l"))
-      .update(["title", 1], ops.INSERT, new Register("l"))
-      .update(["title", 2], ops.INSERT, new Register("o"));
+      .update(["title", 0], ops.INSERT, "l")
+      .update(["title", 1], ops.INSERT, "l")
+      .update(["title", 2], ops.INSERT, "o");
     c.b
-      .update(["title", 0], ops.INSERT, new Register("h"))
-      .update(["title", 1], ops.INSERT, new Register("e"));
+      .update(["title", 0], ops.INSERT, "h")
+      .update(["title", 1], ops.INSERT, "e");
 
     c.sync().expect({ title: ["h", "e", "l", "l", "o"] });
   });
@@ -134,8 +131,8 @@ describe("scenarios", () => {
     const description = "A presentation about something";
 
     // Conccurent operations
-    c.a.update(["title"], ops.ADD, new Register(title));
-    c.b.update(["description"], ops.ADD, new Register(description));
+    c.a.update(["title"], ops.ADD, title);
+    c.b.update(["description"], ops.ADD, description);
 
     c.sync().expect({ title, description });
   });

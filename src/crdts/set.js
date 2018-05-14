@@ -10,6 +10,10 @@ export default class Set {
     return Object.values(this.entries);
   }
 
+  keys() {
+    return Object.keys(this.entries);
+  }
+
   get(id) {
     return this.entries[id];
   }

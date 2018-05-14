@@ -1,6 +1,5 @@
 import * as ops from "../ops";
 import Store from "../core";
-import Register from "../crdts/register";
 
 describe("core", () => {
   describe("constructor", () => {
@@ -19,7 +18,7 @@ describe("core", () => {
   describe("prepare", () => {
     test("ADD", () => {
       const store = new Store("a");
-      const value = new Register("world");
+      const value = "world";
       const field = "hello";
       const op = store.prepare([field], ops.ADD, value);
       expect(op).toMatchObject({
@@ -32,20 +31,20 @@ describe("core", () => {
     test("invalid path should throw", () => {
       const store = new Store("a");
       expect(() => {
-        store.prepare(["hello", ["world"]], ops.ADD, new Register("asdf"));
+        store.prepare(["hello", ["world"]], ops.ADD, "asdf");
       }).toThrow();
       expect(() => {
-        store.prepare([], ops.ADD, new Register("asdf"));
+        store.prepare([], ops.ADD, "asdf");
       }).toThrow();
     });
 
     test("invalid operation should throw", () => {
       const store = new Store("a");
       expect(() => {
-        store.prepare(["hello"], "asdf", new Register("asdf"));
+        store.prepare(["hello"], "asdf", "asdf");
       }).toThrow();
       expect(() => {
-        store.prepare(["hello"], ops.INSERT, new Register("asdf"));
+        store.prepare(["hello"], ops.INSERT, "asdf");
       }).toThrow();
     });
 
@@ -69,7 +68,7 @@ describe("core", () => {
   describe("apply", () => {
     test("ADD", () => {
       const s = new Store("a");
-      const op = s.prepare(["hello"], ops.ADD, new Register("world"));
+      const op = s.prepare(["hello"], ops.ADD, "world");
       s.apply(op);
       expect(s.serialize()).toEqual({ hello: "world" });
     });
@@ -87,7 +86,7 @@ describe("core", () => {
     });
     test("INSERT", () => {
       const s = new Store("a", [1, 2, 3]);
-      const op = s.prepare([1], ops.INSERT, new Register(4));
+      const op = s.prepare([1], ops.INSERT, 4);
       s.apply(op);
       expect(s.serialize()).toEqual([1, 4, 2, 3]);
     });

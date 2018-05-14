@@ -222,14 +222,23 @@ export default class Store {
     if (!obj) {
       return;
     }
+    const parseValue = value => {
+      if (value instanceof Array) {
+        return new List();
+      } else if (value instanceof Object) {
+        return new Map();
+      } else {
+        return new Register(value);
+      }
+    };
     switch (op.type) {
       case ops.ADD:
         // Using timestamp as unique id.
         // TODO Map does not need to have value only k => id/timestamp
-        // TODO we need to garbage collect the replaced object from the store
+        // TODO added value should be by type constant
         obj = obj.add(op.field, op.timestamp, op.timestamp);
         this.store.update(op.objId, obj);
-        this.store.add(op.timestamp, op.value);
+        this.store.add(op.timestamp, parseValue(op.value));
         return;
       case ops.SET:
         obj = obj.update(op.value, op.timestamp);
@@ -238,19 +247,43 @@ export default class Store {
       case ops.INSERT:
         obj = obj.insert(op.afterId, op.timestamp, op.timestamp);
         this.store.update(op.objId, obj);
-        this.store.add(op.timestamp, op.value);
+        this.store.add(op.timestamp, parseValue(op.value));
         return;
       case ops.MOVE:
         obj = obj.move(op.afterId, op.elementId, op.timestamp);
         this.store.update(op.objId, obj);
         return;
       case ops.REMOVE:
-        // TODO remove all descendants
         obj = obj.remove(op.targetId, op.field);
         this.store.update(op.objId, obj);
         this.store.remove(op.targetId);
         return;
     }
+  }
+
+  gc() {
+    const traverse = (id, cb) => {
+      cb(id);
+      const cursor = this.strore.get(id);
+      if (cursor instanceof Map) {
+        cursor.entries().forEach(id => traverse(id, cb));
+      } else if (cursor instanceof List) {
+        cursor.values().forEach(id => {
+          traverse(id, cb);
+        });
+      }
+    };
+    // Traverse state tree, mark objects as active
+    const active = {};
+    traverse(this.store.rootId(), id => {
+      active[id] = true;
+    });
+    // Iterate through all objects and remove ones that are not marked active
+    this.store.ids().forEach(id => {
+      if (!active[id]) {
+        this.store.remove(id);
+      }
+    });
   }
 
   update(...args) {
