@@ -151,7 +151,7 @@ export default class Store {
     return serialize(this.store.root());
   }
 
-  // Returns the id of the object which corresponds to the path.
+  // Returns the object which corresponds to the path.
   lookup(path) {
     return path.reduce((cursor, part) => {
       if (!cursor) {
@@ -167,7 +167,7 @@ export default class Store {
   lookupId(path) {
     const last = path.pop();
     const cursor = this.lookup(path);
-    if (last && cursor) {
+    if (last !== undefined && cursor) {
       return cursor.get(last);
     } else if (cursor) {
       return this.store.rootId();
@@ -192,7 +192,7 @@ export default class Store {
     }
     const objId = this.lookupId(path);
     if (!objId) {
-      throw new Error("Path do not exist");
+      throw new Error(`Path [${path}] do not exist`);
     }
     const obj = this.store.get(objId);
 
@@ -264,9 +264,9 @@ export default class Store {
   gc() {
     const traverse = (id, cb) => {
       cb(id);
-      const cursor = this.strore.get(id);
+      const cursor = this.store.get(id);
       if (cursor instanceof Map) {
-        cursor.entries().forEach(id => traverse(id, cb));
+        cursor.entries().forEach(([, id]) => traverse(id, cb));
       } else if (cursor instanceof List) {
         cursor.values().forEach(id => {
           traverse(id, cb);

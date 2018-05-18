@@ -1,24 +1,36 @@
 import fs from "fs";
 import * as ops from "../src/ops";
 
-const data = Array(1000)
-  .fill(0)
-  .map((a, i) => [
-    [
-      [i],
-      ops.INSERT,
-      {
-        title: "title",
-        subtitle: "subtitle",
-        bullets: ["bullet1", "bullet2", "bullet3"]
-      }
-    ],
-    [[i, "title"], ops.ADD, "title"],
-    [[i, "subtitle"], ops.ADD, "subtitle"],
-    [[i, "bullets"], ops.ADD, []],
-    [[i, "bullets", 0], ops.INSERT, "bullet1"],
-    [[i, "bullets", 1], ops.INSERT, "bullet2"],
-    [[i, "bullets", 2], ops.INSERT, "bullet3"]
-  ]);
+const length = 20;
+const n = 10000;
 
-fs.writeFileSync("data/ops.json", JSON.stringify(data));
+const slides = Array(length)
+  .fill(0)
+  .map(() => ({
+    title: "title",
+    bullets: ["bullet1", "bullet2", "bullet3"]
+  }));
+
+const state = {
+  slides
+};
+
+fs.writeFileSync("data/init.json", JSON.stringify(state));
+
+const getRandomIndex = max => {
+  const r = Math.random();
+  return Math.floor(r * max);
+};
+const operations = [];
+for (let i = 0; i < n / 4; i++) {
+  const idx = getRandomIndex(length - 1);
+  // const moveTo = getRandomIndex(length - 1);
+  operations.push(
+    [["slides", idx], ops.INSERT, {}],
+    [["slides", idx, "title"], ops.ADD, "title"],
+    [["slides", idx, "title"], ops.SET, "updated title"],
+    [["slides", idx], ops.REMOVE]
+  );
+}
+
+fs.writeFileSync("data/ops.json", JSON.stringify(operations));

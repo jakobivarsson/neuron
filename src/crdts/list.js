@@ -1,4 +1,5 @@
 import Set from "./set";
+import Clock from "../clock";
 
 // Special id for the start of the list
 const startId = "__startId__";
@@ -26,7 +27,7 @@ export default class List {
   // which signifies the actual position of the element
   getValidEdges() {
     return this.edges.values().reduce((acc, edge) => {
-      if (!acc[edge.toId] || edge.timestamp > acc[edge.toId]) {
+      if (!acc[edge.toId] || Clock.lt(acc[edge.toId], edge.timestamp)) {
         acc[edge.toId] = edge.timestamp;
       }
       return acc;
@@ -44,7 +45,7 @@ export default class List {
       return acc;
     }, {});
     Object.values(neighbors).forEach(list => {
-      list.sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1));
+      list.sort((a, b) => (Clock.lt(a.timestamp, b.timestamp) ? 1 : -1));
     });
     return neighbors;
   }

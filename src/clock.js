@@ -26,9 +26,13 @@ export default class Clock {
     const [clockStr, id] = timestamp.split(".", 1);
     const clock = Number(clockStr);
 
-    if (!clock) {
+    if (Number.isNaN(clock)) {
       throw new Error(`Cannot parse timestamp: ${timestamp}`);
     }
     return new Clock(id, clock);
+  }
+
+  static lt(a, b) {
+    return a.localeCompare(b, "en", { numeric: true }) < 0;
   }
 }
