@@ -3,6 +3,8 @@ import Store from "../src/core";
 import * as ops from "../src/ops";
 import { fromJS } from "immutable";
 
+const date = new Date().toISOString();
+
 let init = JSON.parse(fs.readFileSync("data/init.json"));
 let data = JSON.parse(fs.readFileSync("data/ops.json"));
 
@@ -44,10 +46,16 @@ const crdt = measure(() => {
     const size = JSON.stringify(s.store).length;
     mem.push(size);
   });
-  fs.writeFileSync("data/benchmark-prepare.json", JSON.stringify(prepare));
-  fs.writeFileSync("data/benchmark-apply.json", JSON.stringify(apply));
-  fs.writeFileSync("data/benchmark-crdt-mem.json", JSON.stringify(mem));
-  fs.writeFileSync("data/benchmark-crdt-payload.json", JSON.stringify(payload));
+  fs.writeFileSync(
+    `data/benchmark-prepare-${date}.json`,
+    JSON.stringify(prepare)
+  );
+  fs.writeFileSync(`data/benchmark-apply-${date}.json`, JSON.stringify(apply));
+  fs.writeFileSync(`data/benchmark-crdt-mem-${date}.json`, JSON.stringify(mem));
+  fs.writeFileSync(
+    `data/benchmark-crdt-payload-${date}.json`,
+    JSON.stringify(payload)
+  );
 });
 
 console.log(`Ran CRDT benchmark in ${crdt} ns`);
@@ -83,7 +91,6 @@ const baseline = measure(() => {
   const store = new Immutable(init);
   const bench = [];
   const mem = [];
-  const payload = [];
   data.forEach(params => {
     const time = measure(() => {
       store.update(...params);
@@ -91,13 +98,14 @@ const baseline = measure(() => {
     bench.push([params[1], time]);
     const size = JSON.stringify(store.state.toJS()).length;
     mem.push(size);
-    payload.push(JSON.stringify(store.state.toJS()).length);
   });
-  fs.writeFileSync("data/benchmark-baseline.json", JSON.stringify(bench));
-  fs.writeFileSync("data/benchmark-baseline-mem.json", JSON.stringify(mem));
   fs.writeFileSync(
-    "data/benchmark-baseline-payload.json",
-    JSON.stringify(payload)
+    `data/benchmark-baseline-${date}.json`,
+    JSON.stringify(bench)
+  );
+  fs.writeFileSync(
+    `data/benchmark-baseline-mem-${date}.json`,
+    JSON.stringify(mem)
   );
 });
 console.log(`Ran baseline benchmark in ${baseline} ns`);
