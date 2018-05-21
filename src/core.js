@@ -179,6 +179,7 @@ export default class Store {
   // Op is the operation to apply on the object.
   // Value is the updated value.
   prepare(path, op, value) {
+    path = [...path];
     // Path needs to contain at least one element
     if (path && path.length === 0) {
       throw new Error("Path should contain at least one element");
