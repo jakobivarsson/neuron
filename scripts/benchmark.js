@@ -110,3 +110,5 @@ const crdt = measure(() => {
 });
 
 console.log(`Ran benchmark in ${crdt} ns`);
+
+console.log(s.serialize());

@@ -24,13 +24,14 @@ const getRandomIndex = max => {
 const operations = [];
 for (let i = 0; i < n / 5; i++) {
   const idx = getRandomIndex(length - 1);
+  const moveFrom = getRandomIndex(length - 1);
   const moveTo = getRandomIndex(length - 1);
   operations.push(
     [["slides", idx], ops.INSERT, {}],
     [["slides", idx, "title"], ops.ADD, "title"],
     [["slides", idx, "title"], ops.SET, "updated title"],
-    [["slides", idx], ops.MOVE, moveTo],
-    [["slides", moveTo], ops.REMOVE]
+    [["slides", idx], ops.REMOVE],
+    [["slides", moveFrom], ops.MOVE, moveTo]
   );
 }
 
