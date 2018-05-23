@@ -1,5 +1,6 @@
 import Set from "./set";
 import Clock from "../clock";
+import { add, remove } from "../immutable";
 
 // Special id for the start of the list
 const startId = "__startId__";
@@ -15,54 +16,26 @@ const Edge = (fromId, toId, timestamp) => ({
 // Edges are keyed by timestamp which must be unique, the edge with the greates timestamp will be used as the current position of the node
 // Nodes are keyed by id
 export default class List {
-  constructor(nodes = new Set(), edges = new Set()) {
+  constructor(nodes = new Set(), edges = {}, validEdges = {}) {
     this.nodes = nodes;
     this.edges = edges;
-  }
-
-  // getValidEdges returns map from toId to edgeId (timestamp)
-  // where the edgeId is the maximum timestamp for each toId
-  // which signifies the actual position of the element
-  getValidEdges() {
-    return this.edges.values().reduce((acc, edge) => {
-      if (!acc[edge.toId] || Clock.lt(acc[edge.toId], edge.timestamp)) {
-        acc[edge.toId] = edge.timestamp;
-      }
-      return acc;
-    }, {});
-  }
-
-  // List of elements that follows id sorted by id.
-  neighbors() {
-    const neighbors = this.edges.values().reduce((acc, edge) => {
-      if (acc[edge.fromId]) {
-        acc[edge.fromId].push(edge);
-      } else {
-        acc[edge.fromId] = [edge];
-      }
-      return acc;
-    }, {});
-    Object.values(neighbors).forEach(list => {
-      list.sort((a, b) => (Clock.lt(a.timestamp, b.timestamp) ? 1 : -1));
-    });
-    return neighbors;
+    this.validEdges = validEdges;
   }
 
   getEdges() {
     if (this.cache) {
       return this.cache;
     }
-    const validEdges = this.getValidEdges();
     const isValid = edge =>
-      validEdges[edge.toId] === edge.timestamp && this.nodes.get(edge.toId);
-    const neighbors = this.neighbors();
+      this.validEdges[edge.toId] === edge.timestamp &&
+      this.nodes.get(edge.toId);
     // Perform DFS on the adjacency list starting at startId
     // Lookup value and remove undefined nodes (that have been removed)
     const traverse = (id = startId) => {
-      if (!neighbors[id]) {
+      if (!this.edges[id]) {
         return [];
       }
-      return neighbors[id].reduce((acc, edge) => {
+      return this.edges[id].reduce((acc, edge) => {
         if (isValid(edge)) {
           acc.push(edge);
         }
@@ -95,21 +68,47 @@ export default class List {
     return this.getEdges()[index].timestamp;
   }
 
+  insertEdge(afterId, id, timestamp) {
+    const edge = Edge(afterId, id, timestamp);
+    const edges = this.edges[afterId];
+    if (!edges) {
+      return add(this.edges, afterId, [edge]);
+    }
+    const index = edges.findIndex(e => Clock.lt(e.timestamp, timestamp));
+    const newEdges = [...edges];
+    if (index < 0) {
+      newEdges.push(edge);
+    } else {
+      newEdges.splice(index, 0, edge);
+    }
+    return add(this.edges, afterId, newEdges);
+  }
+
+  updateValidEdges(id, timestamp) {
+    if (!this.validEdges[id] || Clock.lt(this.validEdges[id], timestamp)) {
+      return add(this.validEdges, id, timestamp);
+    }
+    return this.validEdges;
+  }
+
   // Inserts the value after the element with id=afterId.
   // If afterId is undefined then the element will be placed at the start.
   // Id is used as timestamp
   insert(afterId = startId, value, id) {
     const nodes = this.nodes.add(id, value);
-    const edges = this.edges.add(id, Edge(afterId, id, id));
-    return new List(nodes, edges);
+    const edges = this.insertEdge(afterId, id, id);
+    const validEdges = this.updateValidEdges(id, id);
+    return new List(nodes, edges, validEdges);
   }
 
   move(afterId = startId, id, timestamp) {
-    const edges = this.edges.add(timestamp, Edge(afterId, id, timestamp));
-    return new List(this.nodes, edges);
+    const edges = this.insertEdge(afterId, id, timestamp);
+    const validEdges = this.updateValidEdges(id, timestamp);
+    return new List(this.nodes, edges, validEdges);
   }
 
   remove(id) {
-    return new List(this.nodes.remove(id), this.edges);
+    const validEdges = remove(this.validEdges, id);
+    return new List(this.nodes.remove(id), this.edges, validEdges);
   }
 }

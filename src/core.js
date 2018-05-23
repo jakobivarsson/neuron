@@ -3,7 +3,7 @@ import Clock from "./clock";
 import * as ops from "./ops";
 import Map from "./crdts/map";
 import Register from "./crdts/register";
-import List from "./crdts/list";
+import List from "./crdts/list2";
 
 const validateOp = (op, obj) => {
   let valid = false;
