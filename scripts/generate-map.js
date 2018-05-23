@@ -2,7 +2,7 @@ import fs from "fs";
 import * as ops from "../src/ops";
 
 const length = 50;
-const n = 10000;
+const n = 1000;
 
 // list
 const state = Array(length)
@@ -17,7 +17,7 @@ const getRandomIndex = max => {
 };
 const operations = [];
 for (let i = 0; i < n / 3; i++) {
-  const key1 = getRandomIndex(n - 1);
+  const key1 = `${getRandomIndex(n - 1)}`;
   operations.push(
     [[key1], ops.ADD, "asdf"],
     [[key1], ops.SET, "qwerty"],

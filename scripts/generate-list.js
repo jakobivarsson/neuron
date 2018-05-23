@@ -2,7 +2,7 @@ import fs from "fs";
 import * as ops from "../src/ops";
 
 const length = 50;
-const n = 10000;
+const n = 1000;
 
 // list
 const slides = Array(length)

@@ -39,13 +39,8 @@ const date = new Date().toISOString();
 const dir = `data/benchmark/${benchType}-${date}`;
 fs.mkdirSync(dir);
 
-const init = JSON.parse(
-  fs.readFileSync(`data/benchmark/${benchType}/init.json`)
-);
-const data = JSON.parse(
-  fs.readFileSync(`data/benchmark/${benchType}/ops.json`)
-);
-
+const init = JSON.parse(fs.readFileSync(`data/${benchType}/init.json`));
+const data = JSON.parse(fs.readFileSync(`data/${benchType}/ops.json`));
 const s = new Store("a", init);
 
 const measure = fn => {
@@ -78,13 +73,13 @@ const crdt = measure(() => {
     time = measure(() => {
       op = s.prepare(...params);
     });
-    prepare.push([params[1], time]);
+    prepare.push(time);
     const payloadSize = JSON.stringify(op).length;
     payload.push(payloadSize);
     time = measure(() => {
       s.apply(op);
     });
-    apply.push([params[1], time]);
+    apply.push(time);
     const size = JSON.stringify(s.store).length;
     mem.push(size);
 
@@ -92,7 +87,7 @@ const crdt = measure(() => {
     time = measure(() => {
       store.update(...params);
     });
-    baseline.push([params[1], time]);
+    baseline.push(time);
     const baselineSize = JSON.stringify(store.state.toJS()).length;
     baselineMem.push(baselineSize);
   });
