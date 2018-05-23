@@ -10,7 +10,7 @@ export const SET = "SET";
 export const INSERT = "INSERT";
 
 // Move element to position in list
-// INPUT: MOVE [path to current index] next-index
+// INPUT: MOVE [path to current index] move-to-index
 // OUTPUT: MOVE afterId elementId
 export const MOVE = "MOVE";
 

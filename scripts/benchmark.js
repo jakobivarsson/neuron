@@ -2,6 +2,7 @@ import fs from "fs";
 import Store from "../src/core";
 import * as ops from "../src/ops";
 import { fromJS } from "immutable";
+import stringify from "csv-stringify/lib/sync";
 
 class Immutable {
   constructor(init) {
@@ -36,8 +37,7 @@ class Immutable {
 
 const benchType = process.argv[2];
 const date = new Date().toISOString();
-const dir = `data/benchmark/${benchType}-${date}`;
-fs.mkdirSync(dir);
+const filename = `data/benchmark/${benchType}-${date}.csv`;
 
 const init = JSON.parse(fs.readFileSync(`data/${benchType}/init.json`));
 const data = JSON.parse(fs.readFileSync(`data/${benchType}/ops.json`));
@@ -51,54 +51,52 @@ const measure = fn => {
   return ns;
 };
 
-const crdt = measure(() => {
-  let op;
-  let time;
-  const store = new Immutable(init);
-  const baseline = [];
-  const baselineMem = [];
-  const prepare = [];
-  const apply = [];
-  const mem = [];
-  const payload = [];
-  const gc = [];
-  data.forEach((params, i) => {
-    if (i > 0 && i % 100 === 0) {
-      time = measure(() => {
-        s.gc();
-      });
-      gc.push(time);
-    }
-    // Measure crdt store
-    time = measure(() => {
-      op = s.prepare(...params);
-    });
-    prepare.push(time);
-    const payloadSize = JSON.stringify(op).length;
-    payload.push(payloadSize);
-    time = measure(() => {
-      s.apply(op);
-    });
-    apply.push(time);
-    const size = JSON.stringify(s.store).length;
-    mem.push(size);
-
-    // Measure baseline
-    time = measure(() => {
-      store.update(...params);
-    });
-    baseline.push(time);
-    const baselineSize = JSON.stringify(store.state.toJS()).length;
-    baselineMem.push(baselineSize);
+let op;
+const store = new Immutable(init);
+const output = [];
+data.forEach((params, i) => {
+  if (i > 0 && i % 100 === 0) {
+    s.gc();
+  }
+  // Measure crdt store
+  const prepare = measure(() => {
+    op = s.prepare(...params);
   });
-  fs.writeFileSync(`${dir}/prepare.json`, JSON.stringify(prepare));
-  fs.writeFileSync(`${dir}/apply.json`, JSON.stringify(apply));
-  fs.writeFileSync(`${dir}/mem.json`, JSON.stringify(mem));
-  fs.writeFileSync(`${dir}/payload.json`, JSON.stringify(payload));
-  fs.writeFileSync(`${dir}/baseline.json`, JSON.stringify(baseline));
-  fs.writeFileSync(`${dir}/baseline-mem.json`, JSON.stringify(baselineMem));
+  const payload = JSON.stringify(op).length;
+  const apply = measure(() => {
+    s.apply(op);
+  });
+  const mem = JSON.stringify(s.store).length;
+
+  // Measure baseline
+  const baseline = measure(() => {
+    store.update(...params);
+  });
+  const baselineMem = JSON.stringify(store.state.toJS()).length;
+
+  // Add row to output
+  output.push([
+    i + 1,
+    params[1],
+    prepare,
+    apply,
+    baseline,
+    mem,
+    payload,
+    baselineMem
+  ]);
 });
-
-console.log(`Ran benchmark in ${crdt} ns`);
-
-console.log(s.serialize());
+const csv = stringify(output, {
+  columns: [
+    "operations",
+    "operation type",
+    "prepare",
+    "apply",
+    "baseline",
+    "memory",
+    "payload",
+    "baseline memory"
+  ],
+  header: true
+});
+fs.writeFileSync(filename, csv);
