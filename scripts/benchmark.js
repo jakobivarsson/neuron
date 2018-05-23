@@ -34,10 +34,17 @@ class Immutable {
   }
 }
 
+const benchType = process.argv[2];
 const date = new Date().toISOString();
+const dir = `data/benchmark/${benchType}-${date}`;
+fs.mkdirSync(dir);
 
-const init = JSON.parse(fs.readFileSync("data/init.json"));
-const data = JSON.parse(fs.readFileSync("data/ops.json"));
+const init = JSON.parse(
+  fs.readFileSync(`data/benchmark/${benchType}/init.json`)
+);
+const data = JSON.parse(
+  fs.readFileSync(`data/benchmark/${benchType}/ops.json`)
+);
 
 const s = new Store("a", init);
 
@@ -89,24 +96,12 @@ const crdt = measure(() => {
     const baselineSize = JSON.stringify(store.state.toJS()).length;
     baselineMem.push(baselineSize);
   });
-  fs.writeFileSync(
-    `data/benchmark-prepare-${date}.json`,
-    JSON.stringify(prepare)
-  );
-  fs.writeFileSync(`data/benchmark-apply-${date}.json`, JSON.stringify(apply));
-  fs.writeFileSync(`data/benchmark-crdt-mem-${date}.json`, JSON.stringify(mem));
-  fs.writeFileSync(
-    `data/benchmark-crdt-payload-${date}.json`,
-    JSON.stringify(payload)
-  );
-  fs.writeFileSync(
-    `data/benchmark-baseline-${date}.json`,
-    JSON.stringify(baseline)
-  );
-  fs.writeFileSync(
-    `data/benchmark-baseline-mem-${date}.json`,
-    JSON.stringify(baselineMem)
-  );
+  fs.writeFileSync(`${dir}/prepare.json`, JSON.stringify(prepare));
+  fs.writeFileSync(`${dir}/apply.json`, JSON.stringify(apply));
+  fs.writeFileSync(`${dir}/mem.json`, JSON.stringify(mem));
+  fs.writeFileSync(`${dir}/payload.json`, JSON.stringify(payload));
+  fs.writeFileSync(`${dir}/baseline.json`, JSON.stringify(baseline));
+  fs.writeFileSync(`${dir}/baseline-mem.json`, JSON.stringify(baselineMem));
 });
 
 console.log(`Ran benchmark in ${crdt} ns`);
