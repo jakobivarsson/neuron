@@ -8,8 +8,7 @@
   "scripts": {
     "test": "jest",
     "precommit": "lint-staged",
-    "generate-list": "babel-node scripts/generate-list.js",
-    "generate-map": "babel-node scripts/generate-map.js",
+    "babel": "babel-node",
     "benchmark": "babel-node scripts/benchmark.js"
   },
   "lint-staged": {

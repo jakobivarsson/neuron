@@ -26,26 +26,48 @@ export default class List {
     if (this.cache) {
       return this.cache;
     }
+    if (!this.edges[startId]) {
+      return [];
+    }
     const isValid = edge =>
       this.validEdges[edge.toId] === edge.timestamp &&
       this.nodes.get(edge.toId);
     // Perform DFS on the adjacency list starting at startId
     // Lookup value and remove undefined nodes (that have been removed)
-    const traverse = (id = startId) => {
-      if (!this.edges[id]) {
-        return [];
+    const stack = [];
+    const neighbors = this.edges[startId];
+    for (let i = neighbors.length - 1; i >= 0; --i) {
+      stack.push(neighbors[i]);
+    }
+    const edges = [];
+    while (stack.length > 0) {
+      const edge = stack.pop();
+      if (isValid(edge)) {
+        edges.push(edge);
       }
-      return this.edges[id].reduce((acc, edge) => {
-        if (isValid(edge)) {
-          acc.push(edge);
-        }
-        traverse(edge.timestamp).forEach(edge => {
-          acc.push(edge);
-        });
-        return acc;
-      }, []);
-    };
-    const edges = traverse();
+      const neighbors = this.edges[edge.timestamp];
+      if (!neighbors) {
+        continue;
+      }
+      for (let i = neighbors.length - 1; i >= 0; --i) {
+        stack.push(neighbors[i]);
+      }
+    }
+    // const traverse = (id = startId) => {
+    //   if (!this.edges[id]) {
+    //     return [];
+    //   }
+    //   return this.edges[id].reduce((acc, edge) => {
+    //     if (isValid(edge)) {
+    //       acc.push(edge);
+    //     }
+    //     traverse(edge.timestamp).forEach(edge => {
+    //       acc.push(edge);
+    //     });
+    //     return acc;
+    //   }, []);
+    // };
+    // const edges = traverse();
     this.cache = edges;
     return edges;
   }

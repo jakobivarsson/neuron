@@ -39,9 +39,8 @@ const benchType = process.argv[2];
 const date = new Date().toISOString();
 const filename = `data/benchmark/${benchType}-${date}.csv`;
 
-const init = JSON.parse(fs.readFileSync(`data/${benchType}/init.json`));
-const data = JSON.parse(fs.readFileSync(`data/${benchType}/ops.json`));
-const s = new Store("a", init);
+const data = JSON.parse(fs.readFileSync(`data/${benchType}.json`));
+const s = new Store("a", data.state);
 
 const measure = fn => {
   const start = process.hrtime();
@@ -52,9 +51,9 @@ const measure = fn => {
 };
 
 let op;
-const store = new Immutable(init);
+const store = new Immutable(data.state);
 const output = [];
-data.forEach((params, i) => {
+data.operations.forEach((params, i) => {
   if (i > 0 && i % 100 === 0) {
     s.gc();
   }
@@ -75,21 +74,11 @@ data.forEach((params, i) => {
   const baselineMem = JSON.stringify(store.state.toJS()).length;
 
   // Add row to output
-  output.push([
-    i + 1,
-    params[1],
-    prepare,
-    apply,
-    baseline,
-    mem,
-    payload,
-    baselineMem
-  ]);
+  output.push([i + 1, prepare, apply, baseline, mem, payload, baselineMem]);
 });
 const csv = stringify(output, {
   columns: [
     "operations",
-    "operation type",
     "prepare",
     "apply",
     "baseline",
