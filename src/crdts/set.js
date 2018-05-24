@@ -1,32 +1,32 @@
-import { add, remove } from "../immutable";
+import { Map } from "immutable";
 
 // OR-Set
 export default class Set {
-  constructor(init = {}) {
+  constructor(init = Map()) {
     this.entries = init;
   }
 
   values() {
-    return Object.values(this.entries);
+    return Array.from(this.entries.values());
   }
 
   keys() {
-    return Object.keys(this.entries);
+    return Array.from(this.entries.keys());
   }
 
   get(id) {
-    return this.entries[id];
+    return this.entries.get(id);
   }
 
   has(id) {
-    return !!this.get(id);
+    return this.has(id);
   }
 
   add(id, value) {
-    return new Set(add(this.entries, id, value));
+    return new Set(this.entries.set(id, value));
   }
 
   remove(id) {
-    return new Set(remove(this.entries, id));
+    return new Set(this.entries.delete(id));
   }
 }

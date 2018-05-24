@@ -8,13 +8,9 @@ const state = Array(n)
   .fill(0)
   .reduce((acc, v, i) => ({ ...acc, [i]: v }), {});
 
-const getRandomIndex = max => {
-  const r = Math.random();
-  return Math.floor(r * max);
-};
 const operations = [];
 for (let i = 0; i < n; i++) {
-  const key = `${getRandomIndex(n - i - 1)}`;
+  const key = `${1}`;
   operations.push([[key], ops.REMOVE]);
 }
 
