@@ -10,7 +10,7 @@ const state = Array(n)
 
 const operations = [];
 for (let i = 0; i < n; i++) {
-  const key = `${1}`;
+  const key = `${i}`;
   operations.push([[key], ops.REMOVE]);
 }
 

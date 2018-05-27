@@ -1,25 +1,28 @@
-import { add, remove } from "../immutable";
+import { Map as M } from "immutable";
 
 // Id should be a globally unique id
 const Entry = (key, value, id) => ({ key, value, id });
 
 // Implementation of an optimized OR-set inspired Map
 export default class Map {
-  constructor(init = {}) {
+  constructor(init = M()) {
     this.state = init;
   }
 
   entries() {
-    return Object.entries(this.state).map(([k, v]) => [k, v.id]);
+    return this.state
+      .entrySeq()
+      .map(([k, v]) => [k, v.id])
+      .toArray();
   }
 
   get(k) {
-    const e = this.state[k];
+    const e = this.state.get(k);
     return e && e.value;
   }
 
   getId(k) {
-    const e = this.state[k];
+    const e = this.state.get(k);
     return e && e.id;
   }
 
@@ -28,14 +31,14 @@ export default class Map {
   add(k, v, id) {
     const prevId = this.getId(k);
     if (!prevId || id > prevId) {
-      return new Map(add(this.state, k, Entry(k, v, id)));
+      return new Map(this.state.set(k, Entry(k, v, id)));
     }
     return this;
   }
 
   remove(id, k) {
     if (id === this.getId(k)) {
-      return new Map(remove(this.state, k));
+      return new Map(this.state.remove(k));
     }
     return this;
   }
